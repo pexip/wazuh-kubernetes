@@ -32,10 +32,10 @@ spec:
           image: 'xr09/wazuh:3.11.3_7.5.2'
           resources:
             requests:
-              cpu: 2
+              cpu: 1
               memory: 1024Mi
             limits:
-              cpu: 2
+              cpu: 1
               memory: 2048Mi
           volumeMounts:
             - name: config
