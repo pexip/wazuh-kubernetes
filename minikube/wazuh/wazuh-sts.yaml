@@ -42,8 +42,26 @@ spec:
               mountPath: /wazuh-config-mount/etc/ossec.conf
               subPath: ossec.conf
               readOnly: true
-            - name: wazuh-manager
-              mountPath: /var/ossec/data
+            - name: wazuh-manager-api
+              mountPath: /var/ossec/api/configuration
+            - name: wazuh-manager-etc
+              mountPath: /var/ossec/etc
+            - name: wazuh-manager-logs
+              mountPath: /var/ossec/logs
+            - name: wazuh-manager-queue
+              mountPath: /var/ossec/queue
+            - name: wazuh-manager-multigroups
+              mountPath: /var/ossec/var/multigroups
+            - name: wazuh-manager-integrations
+              mountPath: /var/ossec/integrations
+            - name: wazuh-manager-active-response
+              mountPath: /var/ossec/active-response/bin
+            - name: wazuh-manager-wodles
+              mountPath: /var/ossec/wodles
+            - name: wazuh-manager-filebeat-etc
+              mountPath: /etc/filebeat
+            - name: wazuh-manager-filebeat-var
+              mountPath: /var/lib/filebeat
           ports:
             - containerPort: 1515
               name: registration
@@ -53,10 +71,82 @@ spec:
               name: api
   volumeClaimTemplates:
     - metadata:
-        name: wazuh-manager
+        name: wazuh-manager-api
       spec:
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 500Mi
+            storage: 10Mi
+    - metadata:
+        name: wazuh-manager-etc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Mi
+    - metadata:
+        name: wazuh-manager-logs
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 200Mi
+    - metadata:
+        name: wazuh-manager-queue
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Mi
+    - metadata:
+        name: wazuh-manager-multigroups
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Mi
+    - metadata:
+        name: wazuh-manager-integrations
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Mi
+    - metadata:
+        name: wazuh-manager-active-response
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Mi
+    - metadata:
+        name: wazuh-manager-wodles
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 300Mi
+    - metadata:
+        name: wazuh-manager-filebeat-etc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Mi
+    - metadata:
+        name: wazuh-manager-filebeat-var
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 100Mi
