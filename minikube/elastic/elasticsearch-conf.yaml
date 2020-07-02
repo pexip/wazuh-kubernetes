@@ -1,0 +1,9 @@
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: elasticsearch-conf
+data:
+  elasticsearch.yml: |-
+    cluster.name: wazuh
+    network.host: 0.0.0.0
