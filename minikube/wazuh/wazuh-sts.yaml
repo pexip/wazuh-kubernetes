@@ -27,12 +27,35 @@ spec:
         - name: config
           configMap:
             name: wazuh-manager-conf
-      containers:
-        - name: wazuh-manager
-          image: 'wazuh/wazuh:3.13.0_7.7.1'
+        - name: filebeat-config
+          configMap:
+            name: filebeat-conf
+        - name: wazuh-template-config
+          configMap:
+            name: wazuh-template-conf
+      initContainers:
+        - name: add-wazuh-plugin
+          image: busybox
           resources:
             requests:
-              cpu: 2
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 100m
+              memory: 256Mi
+          command:
+            - sh
+            - '-c'
+            - 'rm -rf /mnt/wazuh-plugin/* && wget -q -O - https://packages.wazuh.com/3.x/filebeat/wazuh-filebeat-0.1.tar.gz | tar -xvz --strip-components=1 -C /mnt/wazuh-plugin/ && chown -R 0:1000 /mnt/wazuh-plugin/'
+          volumeMounts:
+            - name: wazuh-plugin-filebeat
+              mountPath: /mnt/wazuh-plugin
+      containers:
+        - name: wazuh-manager
+          image: 'xr09/wazuh:3.13.0_7.7.1'
+          resources:
+            requests:
+              cpu: 1
               memory: 1024Mi
             limits:
               cpu: 2
@@ -42,8 +65,24 @@ spec:
               mountPath: /wazuh-config-mount/etc/ossec.conf
               subPath: ossec.conf
               readOnly: true
-            - name: wazuh-manager
-              mountPath: /var/ossec/data
+            - name: wazuh-manager-api-config
+              mountPath: /var/ossec/api/configuration
+            - name: wazuh-manager-etc
+              mountPath: /var/ossec/etc
+            - name: wazuh-manager-logs
+              mountPath: /var/ossec/logs
+            - name: wazuh-manager-queue
+              mountPath: /var/ossec/queue
+            - name: wazuh-manager-var-multigroups
+              mountPath: /var/ossec/var/multigroups
+            - name: wazuh-manager-integrations
+              mountPath: /var/ossec/integrations
+            - name: wazuh-manager-active-response
+              mountPath: /var/ossec/active-response/bin
+            - name: wazuh-manager-agentless
+              mountPath: /var/ossec/agentless
+            - name: wazuh-manager-wodles
+              mountPath: /var/ossec/wodles
           ports:
             - containerPort: 1515
               name: registration
@@ -51,12 +90,118 @@ spec:
               name: logging
             - containerPort: 55000
               name: api
+        - name: wazuh-filebeat
+          image: 'docker.elastic.co/beats/filebeat:7.7.1'
+          command: ["filebeat", "-e", "-strict.perms=false", "-environment", "container"]
+          resources:
+            requests:
+              cpu: 0.3
+              memory: 256Mi
+            limits:
+              cpu: 0.5
+              memory: 512Mi
+          volumeMounts:
+            - name: filebeat-config
+              mountPath: /usr/share/filebeat/filebeat.yml
+              subPath: filebeat.yml
+              readOnly: true
+            - name: wazuh-template-config
+              mountPath: /etc/wazuh-template.json
+              subPath: wazuh-template.json
+              readOnly: true
+            - name: wazuh-manager-logs
+              mountPath: /var/ossec/logs
+              readOnly: true
+            - name: wazuh-plugin-filebeat
+              mountPath: /usr/share/filebeat/module/wazuh/
+
   volumeClaimTemplates:
     - metadata:
-        name: wazuh-manager
+        name: wazuh-manager-api-config
       spec:
         accessModes:
           - ReadWriteOnce
         resources:
           requests:
-            storage: 500Mi
+            storage: 50Mi
+
+    - metadata:
+        name: wazuh-manager-etc
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Mi
+
+    - metadata:
+        name: wazuh-manager-logs
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 200Mi
+
+    - metadata:
+        name: wazuh-manager-queue
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Mi
+
+    - metadata:
+        name: wazuh-manager-var-multigroups
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Mi
+
+    - metadata:
+        name: wazuh-manager-integrations
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Mi
+
+    - metadata:
+        name: wazuh-manager-active-response
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Mi
+
+    - metadata:
+        name: wazuh-manager-agentless
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 10Mi
+
+    - metadata:
+        name: wazuh-manager-wodles
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 20Mi
+
+    - metadata:
+        name: wazuh-plugin-filebeat
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Mi

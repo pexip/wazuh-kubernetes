@@ -7,6 +7,7 @@ namespace: wazuh
 # resources to apply
 resources:
 - base.yaml
+- elastic/elasticsearch-conf.yaml
 - elastic/elasticsearch-svc.yaml
 - elastic/elasticsearch-sts.yaml
 - kibana/kibana-svc.yaml
@@ -15,4 +16,6 @@ resources:
 - kibana/nginx-deploy.yaml
 - wazuh/wazuh-svc.yaml
 - wazuh/wazuh-conf.yaml
+- wazuh/filebeat-conf.yaml
+- wazuh/wazuh-template-conf.yaml
 - wazuh/wazuh-sts.yaml
